@@ -31,7 +31,7 @@ RezervacijaService rezervacijaService;
 
         List<Korisnik> lis=korisnikService.findAll();
         for (Korisnik k: lis) {
-            log.info("Get call have been received at user/get/ "+k.getIme());
+         //   log.info("Get call have been received at user/get/ "+k.getIme());
         }
 
         return lis;

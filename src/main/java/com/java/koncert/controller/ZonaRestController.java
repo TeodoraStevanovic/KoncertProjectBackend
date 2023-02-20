@@ -44,7 +44,9 @@ public class ZonaRestController {
         List<Zona>potrebneZone=new ArrayList<>();
         for (Zona z: sveZone) {
             if (z.getKoncert().equals(koncert))
-            {potrebneZone.add(z);}
+            {if(z.getPreostaoBrKarata()!=0){
+                System.out.println(z.getPreostaoBrKarata());
+                potrebneZone.add(z);}}
         }
        return potrebneZone;
     }

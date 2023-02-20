@@ -84,9 +84,9 @@ public class Korisnik implements Serializable {
     }
 
 
-    @JsonManagedReference(value="promo-korisnik")
+  /*  @JsonManagedReference(value="promo-korisnik")
     @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
-    @OneToMany(mappedBy="korisnik", cascade = CascadeType.MERGE )
+    @OneToMany(mappedBy="korisnik", cascade = CascadeType.ALL )
     private List<Promokod> promokodovi;
 
     public void add(Promokod kod) {
@@ -96,6 +96,6 @@ public class Korisnik implements Serializable {
         promokodovi.add(kod);
         kod.setKorisnik(this);
     }
-
+*/
 
 }
