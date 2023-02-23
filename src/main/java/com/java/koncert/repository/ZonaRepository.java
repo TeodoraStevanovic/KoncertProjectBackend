@@ -9,6 +9,5 @@ public interface ZonaRepository extends JpaRepository<Zona,ZonaPK> {
     Zona findByIdzona(int id);
     Zona findByKoncert(int id);
 
-
     void deleteZonaByIdzona(int idzona);
 }

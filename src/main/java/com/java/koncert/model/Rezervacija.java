@@ -1,14 +1,12 @@
 package com.java.koncert.model;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
+
 import lombok.*;
 
 import javax.persistence.*;
 import java.io.Serializable;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
+
 
 @Data
 @AllArgsConstructor
@@ -29,11 +27,11 @@ public class Rezervacija implements Serializable {
     private LocalDateTime placedAt =LocalDateTime.now();
     @Column(name="broj_karata")
     private int brojKarata;
-
+    @Column(name="ukupno")
+    private double ukupno;
 
   // @JsonBackReference(value="rezervacija-korisnik1")
-    @ManyToOne(cascade= {CascadeType.MERGE,
-            CascadeType.REMOVE},fetch = FetchType.EAGER,optional = false)
+    @ManyToOne(cascade= {CascadeType.MERGE,CascadeType.REMOVE},fetch = FetchType.EAGER,optional = false)
     @JoinColumn(name="idkorisnik")
     private Korisnik korisnik;
 

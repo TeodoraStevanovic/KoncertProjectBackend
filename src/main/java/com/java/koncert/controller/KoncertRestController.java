@@ -2,7 +2,6 @@ package com.java.koncert.controller;
 
 import com.java.koncert.model.Koncert;
 
-import com.java.koncert.model.Rezervacija;
 import com.java.koncert.model.Zona;
 import com.java.koncert.service.KoncertService;
 import com.java.koncert.service.ZonaService;
@@ -10,7 +9,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -57,6 +55,7 @@ catch(Exception e){
         Zona z=zonaService.findById(id);
         System.out.println(z);
         Koncert potrebanKoncert=z.getKoncert();
+       // Koncert potrebanKoncert=koncertService.findById(z.getId().getIdkoncert());
         return potrebanKoncert;
     }
 }

@@ -70,18 +70,6 @@ public class Korisnik implements Serializable {
     }
 
 */
-    public Korisnik(String ime, String prezime, String kompanija, String adresa1, String adresa2, String postanskibr, String mesto, String drzava, String email, String potvrdaemail) {
-        this.ime = ime;
-        this.prezime = prezime;
-        this.kompanija = kompanija;
-        this.adresa1 = adresa1;
-        this.adresa2 = adresa2;
-        this.postanskibr = postanskibr;
-        this.mesto = mesto;
-        this.drzava = drzava;
-        this.email = email;
-        this.potvrdaemail = potvrdaemail;
-    }
 
 
   /*  @JsonManagedReference(value="promo-korisnik")

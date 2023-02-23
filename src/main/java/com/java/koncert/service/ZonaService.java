@@ -3,6 +3,7 @@ package com.java.koncert.service;
 import com.java.koncert.model.Koncert;
 import com.java.koncert.model.Zona;
 import com.java.koncert.model.ZonaPK;
+import com.java.koncert.repository.KoncertRepository;
 import com.java.koncert.repository.ZonaRepository;
 import org.springframework.stereotype.Service;
 
@@ -13,24 +14,31 @@ import java.util.Optional;
 public class ZonaService {
 
 ZonaRepository zonaRepository;
+KoncertRepository koncertRepository;
 
-    public ZonaService(ZonaRepository zonaRepository) {
+    public ZonaService(ZonaRepository zonaRepository, KoncertRepository koncertRepository) {
         this.zonaRepository = zonaRepository;
+        this.koncertRepository = koncertRepository;
     }
 
     public List<Zona> findAll() {
-        return zonaRepository.findAll();
+
+         List<Zona> zone=zonaRepository.findAll();
+         return zone;
     }
 
 
     public Zona findById(int theId) {
-        Optional<Zona> result = Optional.ofNullable(zonaRepository.findByIdzona(theId));
-
+        Koncert koncert=findKoncertForZona(theId);
+      Optional<Zona> result = Optional.ofNullable(zonaRepository.findByIdzona(theId));
+      //  Optional<Zona> result = zonaRepository.findById(new ZonaPK(theId,koncert));
         Zona zona = null;
 
         if (result.isPresent()) {
             zona = result.get();
-        Koncert k=    zona.getKoncert();
+       Koncert k=   zona.getKoncert();
+         //   Koncert kon=zona.getId().getIdkoncert();
+         //
         zona.setKoncert(k);
         }
         else {
@@ -39,13 +47,20 @@ ZonaRepository zonaRepository;
         return zona;
     }
 
+    private Koncert findKoncertForZona(int theId) {
+        List<Zona>  lista=zonaRepository.findAll();
+        Koncert trazKoncert=null;
+        for (Zona z: lista) {
+            if (z.getIdzona()==theId)
+            {trazKoncert=z.getKoncert();}
+
+        }
+        return trazKoncert;
+    }
 
 
     public void save(Zona z) {zonaRepository.save(z);}
 
 
-    public void deleteById(int theId) {
-        zonaRepository.deleteZonaByIdzona(theId);
 
-    }
 }
