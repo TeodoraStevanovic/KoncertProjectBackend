@@ -5,20 +5,31 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import javax.persistence.*;
-import java.io.Serializable;
+
 
 @AllArgsConstructor
 @Data
 @NoArgsConstructor
 @Entity
-@IdClass(ZonaPK.class)
+//@IdClass(ZonaPK.class)
 @Table(name="zona")
 @EqualsAndHashCode
 public class Zona  {
-    @Id
-    @GeneratedValue(strategy= GenerationType.AUTO)
-   @Column(name="idzona")
-    private int idzona;
+    @EmbeddedId
+    protected ZonaPK zonaPK;
+    //@Id
+   // @GeneratedValue(strategy= GenerationType.AUTO)
+   //@Column(name="idzona")
+    //private int idzona;
+   // @Id
+    @ManyToOne(cascade= {
+            //CascadeType.PERSIST,
+            CascadeType.MERGE,
+            //CascadeType.DETACH,
+            // CascadeType.REFRESH,
+            CascadeType.REMOVE})
+    @JoinColumn(name="koncert",insertable = false, updatable = false)
+    private Koncert koncert;
 
     private String naziv;
 
@@ -30,15 +41,7 @@ public class Zona  {
 
     @Column(name="preostao_br_karata")
     private int preostaoBrKarata;
-    @Id
-    @ManyToOne(cascade= {
-            //CascadeType.PERSIST,
-            CascadeType.MERGE,
-            //CascadeType.DETACH,
-            // CascadeType.REFRESH,
-            CascadeType.REMOVE},fetch = FetchType.EAGER,optional = false)
-    @JoinColumn(name="koncert")
-    private Koncert koncert;
+
 
     // @JsonBackReference(value="zona-karta2")
   //  @OneToMany(mappedBy="zona", cascade = {CascadeType.ALL },fetch = FetchType.EAGER )

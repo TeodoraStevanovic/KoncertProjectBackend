@@ -6,8 +6,8 @@ import com.java.koncert.model.ZonaPK;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface ZonaRepository extends JpaRepository<Zona,ZonaPK> {
-    Zona findByIdzona(int id);
-    Zona findByKoncert(int id);
+   // Zona findByIdzona(int id);
+  //  Zona findByKoncert(int id);
 
-    void deleteZonaByIdzona(int idzona);
+  //  void deleteZonaByIdzona(int idzona);
 }

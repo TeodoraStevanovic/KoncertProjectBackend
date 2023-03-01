@@ -80,5 +80,33 @@ RezervacijaService rezervacijaService;
 
         }    }
 
-    //treba mi jos funkcija za generisanje promokoda kad neko napravi rezervaciju
+    @GetMapping(value = "/promokod/{kod}")
+    public boolean check(@PathVariable("kod") String promokod) {
+        System.out.println(promokod);
+        try {
+            List<Promokod> promokodovi = promokodService.findAll();
+            Promokod trazeniPromokod = null;
+            for (Promokod kod : promokodovi) {
+                if (kod.getKod().equals(promokod)) {
+                    trazeniPromokod = kod;
+
+                }
+            }
+
+            if (trazeniPromokod != null) {
+                if (trazeniPromokod.getIskoriscen() == 0 && trazeniPromokod.getUpotrebljiv() == 1) {
+                    return true;
+                } else {
+                    return false;
+                }
+            } else {
+                return false;
+            }
+
+        }catch (Exception e){e.printStackTrace();}
+        return false;
+   }
+
+
+
 }

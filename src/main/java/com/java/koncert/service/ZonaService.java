@@ -6,7 +6,6 @@ import com.java.koncert.model.ZonaPK;
 import com.java.koncert.repository.KoncertRepository;
 import com.java.koncert.repository.ZonaRepository;
 import org.springframework.stereotype.Service;
-
 import java.util.List;
 import java.util.Optional;
 
@@ -30,8 +29,8 @@ KoncertRepository koncertRepository;
 
     public Zona findById(int theId) {
         Koncert koncert=findKoncertForZona(theId);
-      Optional<Zona> result = Optional.ofNullable(zonaRepository.findByIdzona(theId));
-      //  Optional<Zona> result = zonaRepository.findById(new ZonaPK(theId,koncert));
+      //Optional<Zona> result = Optional.ofNullable(zonaRepository.findByIdzona(theId));
+        Optional<Zona> result = zonaRepository.findById(new ZonaPK(theId,koncert.getIdkoncert()));
         Zona zona = null;
 
         if (result.isPresent()) {
@@ -51,7 +50,7 @@ KoncertRepository koncertRepository;
         List<Zona>  lista=zonaRepository.findAll();
         Koncert trazKoncert=null;
         for (Zona z: lista) {
-            if (z.getIdzona()==theId)
+            if (z.getZonaPK().getIdzona()==theId)
             {trazKoncert=z.getKoncert();}
 
         }

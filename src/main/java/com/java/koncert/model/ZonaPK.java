@@ -12,9 +12,14 @@ import java.io.Serializable;
 @AllArgsConstructor
 @NoArgsConstructor
 @EqualsAndHashCode
-
+@Embeddable
 public class ZonaPK implements Serializable {
+    @GeneratedValue(strategy= GenerationType.AUTO)
+    @Column(name="idzona")
     private int idzona;
-    private Koncert koncert;
+
+    //private Koncert koncert;
+    @Column(name = "koncert")
+    protected int koncert;
 
 }

@@ -31,7 +31,7 @@ public class Rezervacija implements Serializable {
     private double ukupno;
 
   // @JsonBackReference(value="rezervacija-korisnik1")
-    @ManyToOne(cascade= {CascadeType.MERGE,CascadeType.REMOVE},fetch = FetchType.EAGER,optional = false)
+    @ManyToOne(cascade= {CascadeType.REFRESH},fetch = FetchType.EAGER,optional = false)
     @JoinColumn(name="idkorisnik")
     private Korisnik korisnik;
 
