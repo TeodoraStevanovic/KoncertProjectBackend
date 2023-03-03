@@ -41,7 +41,6 @@ PromokodService promokodService;
     @PostMapping(value = "/rezervacije/{selectedZona}")
     @ResponseStatus(HttpStatus.CREATED)
     public void addReservationAndCards(@RequestBody Rezervacija rezervacija,@PathVariable("selectedZona") int id) {
-        logger.info(String.valueOf(rezervacija));
         Zona zona = zonaService.findById(id);
         if (zona == null) {
             throw new RuntimeException("zona id not found - " + id);
@@ -50,16 +49,17 @@ PromokodService promokodService;
         if (zona!=null){
             koncert=zona.getKoncert();
         }
-        try {//treba da vidimo da li treba da se pravi novi korisnik ili ne
+        try {
             Korisnik korisnikIzBaze = daLiVecPostojiKorisnik(rezervacija);
             if (korisnikIzBaze!=null) {
                 rezervacija.setKorisnik(korisnikIzBaze);
 
             }else{
                 Korisnik korisnik= rezervacija.getKorisnik();
-                rezervacija.setKorisnik(korisnik);
-                korisnikService.save(korisnik);
+                Korisnik sacuvanKorisnik= korisnikService.saveAndReturn(korisnik);
+                rezervacija.setKorisnik(sacuvanKorisnik);
             }
+
            Rezervacija rez= rezervacijaService.create(rezervacija);
            int brojKarata=rez.getBrojKarata();
             if (rez != null && zona!=null && koncert!=null) {
@@ -151,6 +151,75 @@ PromokodService promokodService;
         }
 
         return false;
+    }
+
+    //////////////////
+
+    @PostMapping(value = "/rezervacije/{selectedZona}/{promokod}")
+    @ResponseStatus(HttpStatus.CREATED)
+    public void addReservationAndCardsPromokod(@RequestBody Rezervacija rezervacija,@PathVariable("selectedZona") int id,@PathVariable("promokod") String promokod) {
+        Zona zona = zonaService.findById(id);
+        if (zona == null) {
+            throw new RuntimeException("zona id not found - " + id);
+        }
+        Koncert koncert=null;
+        if (zona!=null){
+            koncert=zona.getKoncert();
+        }
+        try {
+            Korisnik korisnikIzBaze = daLiVecPostojiKorisnik(rezervacija);
+            if (korisnikIzBaze!=null) {
+                rezervacija.setKorisnik(korisnikIzBaze);
+
+            }else{
+                Korisnik korisnik= rezervacija.getKorisnik();
+                Korisnik sacuvanKorisnik= korisnikService.saveAndReturn(korisnik);
+                rezervacija.setKorisnik(sacuvanKorisnik);
+            }
+
+            Rezervacija rez= rezervacijaService.create(rezervacija);
+            int brojKarata=rez.getBrojKarata();
+            if (rez != null && zona!=null && koncert!=null) {
+                for(int i=0; i<rez.getBrojKarata();i++)  {
+                    Karta k=new Karta(-1,zona,koncert,rez);
+                    kartaService.save(k);
+                }}
+            umanjiBrojSlobodnihKarti(brojKarata,zona,koncert);
+            generisiNoviPromoKod(rez);
+            ponistiPrimenjeniPromokod(promokod);
+        }catch(Exception e){
+            System.out.println("ovde jeee ex");
+            e.printStackTrace();
+        }
+    }
+
+    private void ponistiPrimenjeniPromokod(String promokod) {
+        List<Promokod> promokodovi=promokodService.findAll();
+Promokod ponistitikod=null;
+        for (Promokod kod:promokodovi) {
+            if(kod.getKod().equals(promokod)){
+                ponistitikod=kod;
+            }
+
+        }
+if(ponistitikod!=null){
+    if (ponistitikod.getKod()!= null) {
+        ponistitikod.setKod(ponistitikod.getKod());
+    }
+    if (ponistitikod.getIskoriscen()==0) {
+        ponistitikod.setIskoriscen(1);
+    }else {ponistitikod.setIskoriscen(1);}
+    if (ponistitikod.getUpotrebljiv()!=0) {
+        ponistitikod.setUpotrebljiv(0);
+    }else {ponistitikod.setUpotrebljiv(0);}
+    if (ponistitikod.getKorisnik()!= null) {
+        ponistitikod.setKorisnik(ponistitikod.getKorisnik());
+    }
+    if (ponistitikod.getRezervacija()!= null) {
+        ponistitikod.setRezervacija(ponistitikod.getRezervacija());
+    }
+}
+         promokodService.update(ponistitikod);
     }
 
 }

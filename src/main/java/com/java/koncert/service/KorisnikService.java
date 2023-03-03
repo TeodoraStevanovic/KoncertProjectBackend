@@ -1,6 +1,7 @@
 package com.java.koncert.service;
 
 import com.java.koncert.model.Korisnik;
+import com.java.koncert.model.Promokod;
 import com.java.koncert.repository.KorisnikRepository;
 import org.springframework.stereotype.Service;
 
@@ -42,5 +43,9 @@ public class KorisnikService {
     public void deleteById(int theId) {
         korisnikRepository.deleteById(theId);
 
+    }
+    public Korisnik saveAndReturn(Korisnik korisnik) {
+        Korisnik kor=korisnikRepository.save(korisnik);
+        return kor;
     }
 }
