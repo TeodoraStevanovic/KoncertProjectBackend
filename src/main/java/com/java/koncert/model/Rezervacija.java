@@ -29,6 +29,8 @@ public class Rezervacija implements Serializable {
     private int brojKarata;
     @Column(name="ukupno")
     private double ukupno;
+    @Column(name="token")
+    private String token;
 
   // @JsonBackReference(value="rezervacija-korisnik1")
     @ManyToOne(cascade= {CascadeType.REFRESH,CascadeType.MERGE},fetch = FetchType.EAGER,optional = false)

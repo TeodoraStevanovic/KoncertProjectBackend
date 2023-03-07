@@ -16,6 +16,7 @@ import java.util.List;
 //moraces da dodas cross-origin
 @RestController
 @CrossOrigin(origins = "http://localhost:4200")
+@RequestMapping("/api")
 public class KorisnikRestController {
 KorisnikService korisnikService;
 RezervacijaService rezervacijaService;

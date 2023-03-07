@@ -1,16 +1,31 @@
 package com.java.koncert.controller;
+import com.java.koncert.jwt.JwtResponse;
+import com.java.koncert.jwt.JwtTokenUtil;
 import com.java.koncert.model.*;
 import com.java.koncert.service.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.DisabledException;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
+
 import java.security.SecureRandom;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @CrossOrigin(origins = "http://localhost:4200")
+@RequestMapping("/api")
 public class RezervacijaRestController {
 RezervacijaService rezervacijaService;
 ZonaService zonaService;
@@ -19,6 +34,15 @@ KoncertService koncertService;
 KorisnikService korisnikService;
 PromokodService promokodService;
     Logger logger =  LoggerFactory.getLogger(RezervacijaRestController.class);
+
+    @Autowired
+    private AuthenticationManager authenticationManager;
+
+    @Autowired
+    private JwtTokenUtil jwtTokenUtil;
+
+    @Autowired
+    private UserDetailService userDetailsService;
 
 
     public RezervacijaRestController(KorisnikService korisnikService,RezervacijaService rezervacijaService, ZonaService zonaService, KartaService kartaService, KoncertService koncertService, PromokodService promokodService) {
@@ -38,14 +62,16 @@ PromokodService promokodService;
         logger.debug(String.valueOf(rezervacija));
 
     }
-    @PostMapping(value = "/rezervacije/{selectedZona}")
+    @PostMapping(value = "/rezervacije/{selectedZona}/{promokod}")
     @ResponseStatus(HttpStatus.CREATED)
-    public void addReservationAndCards(@RequestBody Rezervacija rezervacija,@PathVariable("selectedZona") int id) {
+    public List<String> addReservationAndCards(@RequestBody Rezervacija rezervacija,@PathVariable("selectedZona") int id,@PathVariable("promokod") String promokod) {
+        List<String> list = new ArrayList<>();
         Zona zona = zonaService.findById(id);
+        Koncert koncert=null;
         if (zona == null) {
             throw new RuntimeException("zona id not found - " + id);
         }
-        Koncert koncert=null;
+
         if (zona!=null){
             koncert=zona.getKoncert();
         }
@@ -59,20 +85,91 @@ PromokodService promokodService;
                 Korisnik sacuvanKorisnik= korisnikService.saveAndReturn(korisnik);
                 rezervacija.setKorisnik(sacuvanKorisnik);
             }
-
-           Rezervacija rez= rezervacijaService.create(rezervacija);
-           int brojKarata=rez.getBrojKarata();
+            //generisanje tokena
+            String token=createAuthenticationToken(rezervacija.getKorisnik().getEmail());
+            rezervacija.setToken(token);
+            logger.info(token+" u metodi");
+            //cuvanje rezervacije
+            Rezervacija rez= rezervacijaService.create(rezervacija);
+            //pravljenje karti
+            int brojKarata=rez.getBrojKarata();
             if (rez != null && zona!=null && koncert!=null) {
-              for(int i=0; i<rez.getBrojKarata();i++)  {
-                  Karta k=new Karta(-1,zona,koncert,rez);
-                  kartaService.save(k);
-              }}
+                for(int i=0; i<rez.getBrojKarata();i++)  {
+                    Karta k=new Karta(-1,zona,koncert,rez);
+                    kartaService.save(k);
+                }}
+            //smanjenje broja slobodnih mesta
+
             umanjiBrojSlobodnihKarti(brojKarata,zona,koncert);
-            generisiNoviPromoKod(rez);
+            ponistiPrimenjeniPromokod(promokod);
+            //generisanje novog promo koda
+            String generisanPromokod=generisiNoviPromoKod(rez);
+            logger.info(generisanPromokod+" u metodi");
+            //ponistenje promokoda ako je primenjen
+
+            list.add(token);
+            list.add(generisanPromokod);
+
+
         }catch(Exception e){
             System.out.println("ovde jeee ex");
             e.printStackTrace();
         }
+        return list;
+    }
+    @PostMapping(value = "/rezervacije/{selectedZona}")
+    @ResponseStatus(HttpStatus.CREATED)
+    public List<String> addReservationAndCardsBezPromokoda(@RequestBody Rezervacija rezervacija,@PathVariable("selectedZona") int id) {
+        List<String> list = new ArrayList<>();
+        Zona zona = zonaService.findById(id);
+        Koncert koncert=null;
+        if (zona == null) {
+            throw new RuntimeException("zona id not found - " + id);
+        }
+
+        if (zona!=null){
+            koncert=zona.getKoncert();
+        }
+        try {
+            Korisnik korisnikIzBaze = daLiVecPostojiKorisnik(rezervacija);
+            if (korisnikIzBaze!=null) {
+                rezervacija.setKorisnik(korisnikIzBaze);
+
+            }else{
+                Korisnik korisnik= rezervacija.getKorisnik();
+                Korisnik sacuvanKorisnik= korisnikService.saveAndReturn(korisnik);
+                rezervacija.setKorisnik(sacuvanKorisnik);
+            }
+            //generisanje tokena
+            String token=createAuthenticationToken(rezervacija.getKorisnik().getEmail());
+            rezervacija.setToken(token);
+            logger.info(token+" u metodi");
+            //cuvanje rezervacije
+            Rezervacija rez= rezervacijaService.create(rezervacija);
+            //pravljenje karti
+            int brojKarata=rez.getBrojKarata();
+            if (rez != null && zona!=null && koncert!=null) {
+                for(int i=0; i<rez.getBrojKarata();i++)  {
+                    Karta k=new Karta(-1,zona,koncert,rez);
+                    kartaService.save(k);
+                }}
+            //smanjenje broja slobodnih mesta
+
+            umanjiBrojSlobodnihKarti(brojKarata,zona,koncert);
+            //generisanje novog promo koda
+            String generisanPromokod=generisiNoviPromoKod(rez);
+            logger.info(generisanPromokod+" u metodi");
+            //ponistenje promokoda ako je primenjen
+
+            list.add(token);
+            list.add(generisanPromokod);
+
+
+        }catch(Exception e){
+            System.out.println("ovde jeee ex");
+            e.printStackTrace();
+        }
+        return list;
     }
 
     private Korisnik daLiVecPostojiKorisnik(Rezervacija rezervacija) {
@@ -86,12 +183,12 @@ PromokodService promokodService;
         return null;
     }
 
-    private void generisiNoviPromoKod(Rezervacija rez) {
+    private String generisiNoviPromoKod(Rezervacija rez) {
         //generisanje promo koda
         String promoKod= generatePromoCode();
-        logger.info(promoKod);
         Promokod promokod=new Promokod(promoKod,0,1, rez.getKorisnik(), rez);
         promokodService.save(promokod);
+        return promoKod;
     }
 
 
@@ -109,7 +206,6 @@ PromokodService promokodService;
 
     }
 
-
     @GetMapping("/rezervacije")
     public List<Rezervacija> listRez() {
 
@@ -119,7 +215,6 @@ PromokodService promokodService;
     private static final String ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
     private static final int CODE_LENGTH = 8;
     private static final int MAX_ATTEMPTS = 100;
-
     private static final SecureRandom random = new SecureRandom();
 
     public String generatePromoCode() {
@@ -153,45 +248,7 @@ PromokodService promokodService;
         return false;
     }
 
-    //////////////////
 
-    @PostMapping(value = "/rezervacije/{selectedZona}/{promokod}")
-    @ResponseStatus(HttpStatus.CREATED)
-    public void addReservationAndCardsPromokod(@RequestBody Rezervacija rezervacija,@PathVariable("selectedZona") int id,@PathVariable("promokod") String promokod) {
-        Zona zona = zonaService.findById(id);
-        if (zona == null) {
-            throw new RuntimeException("zona id not found - " + id);
-        }
-        Koncert koncert=null;
-        if (zona!=null){
-            koncert=zona.getKoncert();
-        }
-        try {
-            Korisnik korisnikIzBaze = daLiVecPostojiKorisnik(rezervacija);
-            if (korisnikIzBaze!=null) {
-                rezervacija.setKorisnik(korisnikIzBaze);
-
-            }else{
-                Korisnik korisnik= rezervacija.getKorisnik();
-                Korisnik sacuvanKorisnik= korisnikService.saveAndReturn(korisnik);
-                rezervacija.setKorisnik(sacuvanKorisnik);
-            }
-
-            Rezervacija rez= rezervacijaService.create(rezervacija);
-            int brojKarata=rez.getBrojKarata();
-            if (rez != null && zona!=null && koncert!=null) {
-                for(int i=0; i<rez.getBrojKarata();i++)  {
-                    Karta k=new Karta(-1,zona,koncert,rez);
-                    kartaService.save(k);
-                }}
-            umanjiBrojSlobodnihKarti(brojKarata,zona,koncert);
-            generisiNoviPromoKod(rez);
-            ponistiPrimenjeniPromokod(promokod);
-        }catch(Exception e){
-            System.out.println("ovde jeee ex");
-            e.printStackTrace();
-        }
-    }
 
     private void ponistiPrimenjeniPromokod(String promokod) {
         List<Promokod> promokodovi=promokodService.findAll();
@@ -220,6 +277,32 @@ if(ponistitikod!=null){
     }
 }
          promokodService.update(ponistitikod);
+    }
+    //
+
+    public String createAuthenticationToken(String email) throws Exception {
+        JwtResponse response=new JwtResponse();
+
+        authenticate(email);
+        final UserDetails userDetails = userDetailsService.loadUserByUsername(email);
+
+        final String token = jwtTokenUtil.generateToken(userDetails);
+        //response.setJwtToken(token);
+        //  storeTokenInCookie(token,responseEntity);
+
+        return token;
+    }
+
+
+    private Authentication authenticate(String email) throws Exception {
+        try {
+            Authentication auth= authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(email, "lozinka"));
+            return auth;
+        } catch (DisabledException e) {
+            throw new Exception("USER_DISABLED", e);
+        } catch (BadCredentialsException e) {
+            throw new Exception("INVALID_CREDENTIALS", e);
+        }
     }
 
 }
