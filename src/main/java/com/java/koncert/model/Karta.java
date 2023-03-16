@@ -31,7 +31,7 @@ public class Karta {
     private Koncert koncert;
 
    // @JsonBackReference(value="rezervacija-karte")
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name="rezervacija")
     private Rezervacija rezervacija;
 }

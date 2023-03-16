@@ -2,6 +2,7 @@ package com.java.koncert.controller;
 import com.java.koncert.jwt.JwtResponse;
 import com.java.koncert.jwt.JwtTokenUtil;
 import com.java.koncert.model.*;
+import com.java.koncert.responseClass.ResponseRezervacijaKarte;
 import com.java.koncert.service.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,11 +18,13 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 
+import javax.servlet.ServletOutputStream;
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.security.SecureRandom;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @RestController
 @CrossOrigin(origins = "http://localhost:4200")
@@ -143,7 +146,7 @@ PromokodService promokodService;
             //generisanje tokena
             String token=createAuthenticationToken(rezervacija.getKorisnik().getEmail());
             rezervacija.setToken(token);
-            logger.info(token+" u metodi");
+
             //cuvanje rezervacije
             Rezervacija rez= rezervacijaService.create(rezervacija);
             //pravljenje karti
@@ -158,7 +161,6 @@ PromokodService promokodService;
             umanjiBrojSlobodnihKarti(brojKarata,zona,koncert);
             //generisanje novog promo koda
             String generisanPromokod=generisiNoviPromoKod(rez);
-            logger.info(generisanPromokod+" u metodi");
             //ponistenje promokoda ako je primenjen
 
             list.add(token);
@@ -281,15 +283,9 @@ if(ponistitikod!=null){
     //
 
     public String createAuthenticationToken(String email) throws Exception {
-        JwtResponse response=new JwtResponse();
-
         authenticate(email);
         final UserDetails userDetails = userDetailsService.loadUserByUsername(email);
-
         final String token = jwtTokenUtil.generateToken(userDetails);
-        //response.setJwtToken(token);
-        //  storeTokenInCookie(token,responseEntity);
-
         return token;
     }
 
@@ -304,6 +300,39 @@ if(ponistitikod!=null){
             throw new Exception("INVALID_CREDENTIALS", e);
         }
     }
+
+    //
+    @GetMapping("/rezervacija/{token}/{email}")
+    public ResponseRezervacijaKarte findRezervacija(@PathVariable("token") String token, @PathVariable("email") String email) {
+        try {
+            Korisnik korisnik = korisnikService.findByEmail(email);
+            Rezervacija rezervacija = rezervacijaService.findByTokenAndKorisnik(korisnik, token);
+            //za tu rezervaciju treba da nadjemo sve karte
+            List<Karta> karte = new ArrayList<>();
+            List<Karta> sveKarte = kartaService.findAll();
+            Zona z=null;
+            for (Karta k : sveKarte) {
+                if (k.getRezervacija().equals(rezervacija)) {
+                    //posto su sve karte iz iste zone
+                    karte.add(k);
+
+                }
+
+            }
+            if (!karte.isEmpty()){
+                Karta k=karte.get(0);
+                z=  k.getZona();}
+
+            ResponseRezervacijaKarte response=new ResponseRezervacijaKarte(rezervacija,karte,z);
+            System.out.println(response);
+
+            return response;
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        return null;
+    }
+
 
 }
 

@@ -33,7 +33,7 @@ public class Rezervacija implements Serializable {
     private String token;
 
   // @JsonBackReference(value="rezervacija-korisnik1")
-    @ManyToOne(cascade= {CascadeType.REFRESH,CascadeType.MERGE},fetch = FetchType.EAGER,optional = false)
+    @ManyToOne(cascade= {CascadeType.REFRESH,CascadeType.MERGE},fetch = FetchType.LAZY,optional = false)
     @JoinColumn(name="idkorisnik")
     private Korisnik korisnik;
 

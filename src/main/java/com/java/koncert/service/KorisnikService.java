@@ -48,4 +48,9 @@ public class KorisnikService {
         Korisnik kor=korisnikRepository.save(korisnik);
         return kor;
     }
+
+    public Korisnik findByEmail(String email) {
+        Korisnik korisnik = korisnikRepository.findByEmail(email);
+        return korisnik;
+    }
 }

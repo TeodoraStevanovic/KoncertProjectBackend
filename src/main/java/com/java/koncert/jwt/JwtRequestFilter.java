@@ -1,6 +1,5 @@
 package com.java.koncert.jwt;
 
-
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.java.koncert.service.UserDetailService;
@@ -11,6 +10,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import javax.servlet.FilterChain;
@@ -18,11 +18,13 @@ import javax.servlet.ServletException;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.util.Date;
-import java.util.HashMap;
 
-import static org.springframework.http.MediaType.APPLICATION_JSON_UTF8_VALUE;
+import java.io.IOException;
+import java.util.Enumeration;
+import java.util.Map;
+
+
+
 
 @Component
 public class JwtRequestFilter extends OncePerRequestFilter {
@@ -36,21 +38,22 @@ public class JwtRequestFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
             throws ServletException, IOException {
         final String requestTokenHeader = request.getHeader("Authorization");
-       // logger.warn(requestTokenHeader);
-        String username = null;
-        String jwtToken = null;
-      //  String cookieName="access_token";
-      //  String cookieType="token_type";
-      // Cookie cookie=getCookie(request,cookieName);
-       // Cookie type=getCookie(request,cookieType);
-      //  String cookieToken="vrednost";
 
-      //  if (cookie!=null && type!=null) {cookieToken = type.getValue() + " " + cookie.getValue();}
+        String username = null;
+       String jwtToken = null;
+      // String cookieName="access_token";
+      // String cookieType="token_type";
+     // Cookie cookie=getCookie(request,cookieName);
+      //  Cookie type=getCookie(request,cookieType);
+      // String cookieToken="vrednost";
+
+       // if (cookie!=null && type!=null) {cookieToken = type.getValue() + " " + cookie.getValue();}
 
         //  System.out.println(cookieToken);
         // JWT Token is in the form "Bearer token". Remove Bearer word and get
         // only the Token
         if ((requestTokenHeader != null && requestTokenHeader.startsWith("Bearer "))) {
+           //
 //|| (cookieToken!="vrednost")
            if ((requestTokenHeader != null && requestTokenHeader.startsWith("Bearer "))){
                jwtToken = requestTokenHeader.substring(7);
@@ -64,7 +67,9 @@ public class JwtRequestFilter extends OncePerRequestFilter {
                }
 
            }
-          /* else{
+        /*
+           else{
+
 
                // jwtToken=cookie.getValue();
                jwtToken = cookieToken.substring(7);
@@ -117,4 +122,6 @@ public class JwtRequestFilter extends OncePerRequestFilter {
         }
         return null;
     }
+
+
 }

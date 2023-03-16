@@ -32,13 +32,13 @@ public class Promokod implements Serializable {
 
     @JsonBackReference(value="promo-korisnik")
     @ManyToOne(cascade= {CascadeType.PERSIST, CascadeType.MERGE,
-            CascadeType.DETACH, CascadeType.REFRESH})
+            CascadeType.DETACH, CascadeType.REFRESH},fetch = FetchType.LAZY)
     @JoinColumn(name="korisnik")
     private Korisnik korisnik;
 
     @JsonBackReference(value="promo-rez")
     @ManyToOne(cascade= {CascadeType.PERSIST, CascadeType.MERGE,
-            CascadeType.DETACH, CascadeType.REFRESH})
+            CascadeType.DETACH, CascadeType.REFRESH},fetch = FetchType.LAZY)
     @JoinColumn(name="rezervacija")
     private Rezervacija rezervacija;
 

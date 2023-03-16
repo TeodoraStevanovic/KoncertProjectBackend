@@ -1,6 +1,7 @@
 package com.java.koncert.service;
 
 import com.java.koncert.model.Koncert;
+import com.java.koncert.model.Korisnik;
 import com.java.koncert.model.Rezervacija;
 import com.java.koncert.repository.RezervacijaRepository;
 import org.springframework.stereotype.Service;
@@ -35,7 +36,10 @@ public class RezervacijaService {
         }
         return rez;
     }
-
+    public Rezervacija findByTokenAndKorisnik(Korisnik korisnik,String token) {
+        Rezervacija rezervacija = rezervacijaRepository.findByKorisnikAndToken(korisnik,token);
+        return rezervacija;
+    }
 
 
     public void save(Rezervacija rezervacija) {rezervacijaRepository.save(rezervacija);}
@@ -43,6 +47,12 @@ public class RezervacijaService {
 
     public void deleteById(int theId) {
         rezervacijaRepository.deleteById(theId);
+       // rezervacijaRepository.flush();
+
+    }
+    public void deleteReservation(Rezervacija r) {
+        rezervacijaRepository.delete(r);
+
 
     }
 

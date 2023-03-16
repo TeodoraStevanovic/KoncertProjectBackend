@@ -80,6 +80,9 @@
             <version>1.18.20.0</version>
             <scope>provided</scope>
         </dependency>
+
+        <!-- Thanks for using https://jar-download.com -->
+
     </dependencies>
 
     <build>

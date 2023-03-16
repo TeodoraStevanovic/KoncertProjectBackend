@@ -109,5 +109,42 @@ RezervacijaService rezervacijaService;
    }
 
 
+    @PutMapping(path="/promokod/{id}")
+    public Promokod patchPromo(@PathVariable("id") int idRezervacije) {
+        //prvo nadjemo promokod za rezervaciju
+        Promokod promokod=pronadjiPromokod(idRezervacije);
+        if(promokod!=null){
+            if (promokod.getKod()!= null) {
+                promokod.setKod(promokod.getKod());
+            }
+            if (promokod.getIskoriscen()==0) {
+                promokod.setIskoriscen(1);
+            }else {promokod.setIskoriscen(1);}
+            if (promokod.getUpotrebljiv()!=0) {
+                promokod.setUpotrebljiv(0);
+            }else {promokod.setUpotrebljiv(0);}
+            if (promokod.getKorisnik()!= null) {
+                promokod.setKorisnik(promokod.getKorisnik());
+            }
+            if (promokod.getRezervacija()!= null) {
+                promokod.setRezervacija(promokod.getRezervacija());
+            }
+        }
+        return  promokodService.update(promokod);
+
+    }
+
+    private Promokod pronadjiPromokod(int id) {
+        List<Promokod> sviPromokodovi=promokodService.findAll();
+        Promokod promokod=null;
+        for (Promokod p:sviPromokodovi) {
+            if (p.getRezervacija() != null) {
+                if (p.getRezervacija().getIdrezervacija() == id) {
+                    promokod = p;
+                }
+            }
+        }
+        return promokod;
+    }
 
 }
