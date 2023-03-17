@@ -16,4 +16,5 @@ import java.util.List;
 public class RequestRezervacijaZona {
     Rezervacija rezervacija;
     Zona zona;
+    int brojKarti;
 }
