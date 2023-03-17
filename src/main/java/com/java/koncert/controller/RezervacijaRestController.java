@@ -1,8 +1,7 @@
 package com.java.koncert.controller;
-import com.java.koncert.jwt.JwtResponse;
 import com.java.koncert.jwt.JwtTokenUtil;
 import com.java.koncert.model.*;
-import com.java.koncert.responseClass.ResponseRezervacijaKarte;
+import com.java.koncert.responseAndRequestClass.ResponseRezervacijaKarte;
 import com.java.koncert.service.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,11 +17,6 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 
-import javax.servlet.ServletOutputStream;
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.io.PrintWriter;
 import java.security.SecureRandom;
 import java.util.*;
 

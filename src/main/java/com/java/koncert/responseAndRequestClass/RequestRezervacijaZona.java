@@ -1,4 +1,4 @@
-package com.java.koncert.responseClass;
+package com.java.koncert.responseAndRequestClass;
 
 import com.java.koncert.model.Karta;
 import com.java.koncert.model.Rezervacija;
@@ -9,12 +9,11 @@ import lombok.NoArgsConstructor;
 
 import java.util.ArrayList;
 import java.util.List;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class ResponseRezervacijaKarte {
+public class RequestRezervacijaZona {
     Rezervacija rezervacija;
-    List<Karta> karte=new ArrayList<>();
     Zona zona;
-
 }

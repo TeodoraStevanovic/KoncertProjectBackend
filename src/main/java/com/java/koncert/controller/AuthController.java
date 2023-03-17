@@ -1,7 +1,8 @@
 package com.java.koncert.controller;
 
 import com.java.koncert.model.*;
-import com.java.koncert.responseClass.ResponseRezervacijaKarte;
+import com.java.koncert.responseAndRequestClass.RequestRezervacijaZona;
+import com.java.koncert.responseAndRequestClass.ResponseRezervacijaKarte;
 import com.java.koncert.service.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -106,4 +107,59 @@ koncert=zona.getKoncert();
     }
 
 
+    //
+    @PutMapping(path="/rezervacija")
+    public void putRezervacija(@RequestBody RequestRezervacijaZona rezervacijaZona) {
+Rezervacija rezervacija=rezervacijaZona.getRezervacija();
+Zona zona=rezervacijaZona.getZona();
+Koncert koncert=null;
+Rezervacija rezervacijaPreIzmene=rezervacijaService.findById(rezervacija.getIdrezervacija());
+        if (zona!=null){
+            koncert=zona.getKoncert();
+        }
+        pravljenjeKarti(rezervacija, zona, koncert, rezervacijaPreIzmene);
+
+
+        if(rezervacija!=null){
+            if (rezervacija.getKorisnik()!= null) {
+                rezervacija.setKorisnik(rezervacija.getKorisnik());
+            }
+            if (rezervacija.getBrojKarata()!=0) {
+                rezervacija.setBrojKarata(rezervacija.getBrojKarata());
+            }
+            if (rezervacija.getUkupno()!=0) {
+                rezervacija.setUkupno(rezervacija.getUkupno());
+            }
+            if (rezervacija.getToken()!=null) {
+               rezervacija.setToken(rezervacija.getToken());
+            }
+        }
+        rezervacijaService.update(rezervacija);
+
+    }
+
+    private void pravljenjeKarti(Rezervacija rezervacija, Zona zona, Koncert koncert, Rezervacija rezervacijaPreIzmene) {
+        int noviBrojKarti= rezervacija.getBrojKarata();
+        int stariBrojKarata= rezervacijaPreIzmene.getBrojKarata();
+        if (rezervacija != null && rezervacijaPreIzmene != null && zona !=null && koncert !=null) {
+            for(int i=0; i<noviBrojKarti-stariBrojKarata;i++)  {
+                Karta k=new Karta(-1, zona, koncert, rezervacija);
+                kartaService.save(k);
+            }}
+        umanjiBrojSlobodnihKarti(noviBrojKarti-stariBrojKarata,zona,koncert);
+    }
+
+    private void umanjiBrojSlobodnihKarti(int brojKarata, Zona zona,Koncert koncert) {
+        try {
+            if (zona.getPreostaoBrKarata()!=0 ){
+                zona.setPreostaoBrKarata(zona.getPreostaoBrKarata()-brojKarata);
+            }
+            zona.getZonaPK().setIdzona(zona.getZonaPK().getIdzona());
+            zona.setKoncert(koncert);
+            zonaService.save(zona);
+        }catch (Exception ex){
+            ex.printStackTrace();
+        }
+
+    }
 }

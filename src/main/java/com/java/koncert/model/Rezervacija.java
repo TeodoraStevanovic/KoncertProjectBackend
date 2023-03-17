@@ -43,6 +43,8 @@ public class Rezervacija implements Serializable {
         this.korisnik = korisnik;
     }
 
+
+
 /*
     @JsonManagedReference(value="promo-rezervacija")
     @OneToMany(mappedBy="rezervacija", cascade = CascadeType.ALL )

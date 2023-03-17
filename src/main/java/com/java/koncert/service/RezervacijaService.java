@@ -2,6 +2,7 @@ package com.java.koncert.service;
 
 import com.java.koncert.model.Koncert;
 import com.java.koncert.model.Korisnik;
+import com.java.koncert.model.Promokod;
 import com.java.koncert.model.Rezervacija;
 import com.java.koncert.repository.RezervacijaRepository;
 import org.springframework.stereotype.Service;
@@ -57,6 +58,11 @@ public class RezervacijaService {
     }
 
     public Rezervacija create(Rezervacija rezervacija) {
+        Rezervacija rez=rezervacijaRepository.save(rezervacija);
+        return rez;
+    }
+
+    public Rezervacija update(Rezervacija rezervacija) {
         Rezervacija rez=rezervacijaRepository.save(rezervacija);
         return rez;
     }
